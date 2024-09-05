@@ -1,0 +1,57 @@
+connected to {{ host }} as {{ username }}@{{ host }}<br>
+{{ output }}
+
+
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+<h3 id="pwd">{{pwd}}</h3>
+
+<div id="filelist">
+{% for file in files %}
+<button onclick="ssh_gui('{{ file }}')"> {{ file }} </button> <br>
+{% endfor %}
+</div>
+
+<script>
+
+    function ssh_gui(file) {
+        pwd = document.getElementById('pwd').innerHTML;
+        csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        fetch('./cd/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({
+                pwd: pwd,
+                cd: file
+            })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json(); // or response.text() for plain text
+            })
+            .then(data => {
+                console.log(data);
+                files = data.files;
+                pwd = data.pwd;
+                document.getElementById('filelist').innerHTML = '';
+                files.forEach(file => {
+                    document.getElementById('filelist').innerHTML += `<button onclick="ssh_gui('${file}')"> ${file} </button> <br>`;
+                });
+
+                if (pwd === '') {
+                    pwd = '/';
+                }
+                document.getElementById('pwd').innerHTML = pwd;
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+
+    }
+
+</script>
