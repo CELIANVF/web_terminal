@@ -5,26 +5,43 @@ body {
     font-size: 12px;
     margin: 0;
     padding: 0;
+    overflow-x: hidden;
+    
 }
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
 
 .directory {
     cursor: pointer;
     box-shadow: 1px 0px 1px black;
-    background-color: rgb(255, 232, 244);
+    /* background-color: rgb(255, 232, 244); */
 }
 
 .directory:hover {
     background-color: #E5F3FF;
 }
 
+.directory:active {
+    background-color: #CCE8FF;
+    border-radius: 3px;
+    border: #000000;
+}
+
 .file {
     cursor: pointer;
     box-shadow: 1px 0px 1px black;
-    background-color: rgb(248, 255, 246);
+    /* background-color: rgb(248, 255, 246); */
 }
 
 .file:hover {
     background-color: #E5F3FF;
+}
+
+file:active {
+    background-color: #CCE8FF;
 }
 
 .filelist {
@@ -51,6 +68,7 @@ body {
     display: none;
     justify-content: center;
     align-items: center;
+    z-index: 2000;
 }
 
 .modal-body {
@@ -60,7 +78,10 @@ body {
     background-color: white;
     border-radius: 10px;
     padding: 20px;
+    resize: both; /* Allow both horizontal and vertical resizing */
+    overflow: auto; /* Ensure content inside can scroll if necessary */
 }
+
 
 .modal-head {
     display: flex;
@@ -83,3 +104,73 @@ body {
     height: calc(100% - 20px);
     font-size: 12px;
 }
+
+
+/* Icon styles */
+.fa-folder {
+    color: #f0ad4e; /* Orange folder icon */
+    margin-right: 10px;
+}
+
+.fa-file {
+    color: #5bc0de; /* Blue file icon */
+    margin-right: 10px;
+}
+
+.fa-link {
+    color: #5cb85c; /* Green link icon */
+    margin-right: 10px;
+}
+
+
+/* Adjust the size of the icons */
+.fa-folder, .fa-file, .fa-link {
+    font-size: 16px; /* Set a standard icon size */
+    width: 16px;     /* Ensure the width is defined */
+    height: auto;    /* Allow height to adjust based on width */
+    margin-right: 10px;
+    display: inline-block;
+    vertical-align: middle; /* Align icon with the text in the row */
+}
+
+/* Style for the terminal menu */
+.terminal-menu {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #333;
+    color: white;
+    padding: 10px;
+    z-index: 1000;
+}
+
+#terminal-container {
+    width: 100%;
+    height: 90%;
+    background-color: #1e1e1e;
+    margin: 5px;
+    resize: vertical; /* Allow vertical resizing */
+    overflow: auto;   /* Ensure content can scroll if necessary */
+    min-height: 100px; /* Set a minimum height */
+}
+
+
+#terminal {
+    background-color: #1e1e1e;
+    color: #00ff00;
+    border: none;
+    outline: none;
+    width: 100%;
+    height: calc(100% - 40px); /* Adjust the height as needed to fit within the container */
+    overflow-y: auto; /* Enable vertical scrolling if content overflows */
+    overflow-x: auto; /* Enable horizontal scrolling if necessary */
+    white-space: pre-wrap; /* Preserve whitespace but allow wrapping */
+}
+
+#command-input {
+    width: 100%;
+    resize: none; /* Prevent resizing of the input field itself */
+    margin-top: 5px; /* Space between the terminal output and the input field */
+}
+

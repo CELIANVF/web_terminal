@@ -3,3 +3,4 @@ ssh/__pycache__
 web_terminal/__pycache__/
 static/admin
 temp/
+lvenv/

@@ -24,29 +24,51 @@ async function ssh_gui(file) {
 
         files.forEach(file => {
             const tr = document.createElement('tr');
-            if (file[0][0] === 'd' || file[0][0] === 'l') {
-                tr.onclick = () => ssh_gui(file[8]);
+            const fileName = file[8]; // Assuming file name is at index 8
+
+            const tdIcon = document.createElement('td');
+            const icon = document.createElement('i');
+
+            // Determine the file type and set appropriate icon class
+            if (file[0][0] === 'd') { // Directory
+                icon.classList.add('fas', 'fa-folder');
+                tr.onclick = () => ssh_gui(fileName);
                 tr.classList.add('directory');
-            } else {
-                tr.onclick = () => file_edit(file[8]);
+            } else if (file[0][0] === 'l') { // Symlink
+                icon.classList.add('fas', 'fa-link');
+                tr.onclick = () => ssh_gui(fileName);
+                tr.classList.add('directory');
+            } else { // Regular file
+                icon.classList.add('fas', 'fa-file');
+                tr.onclick = () => file_edit(fileName);
                 tr.classList.add('file');
             }
 
-            Object.values(file).forEach(element => {
+            // Add icon to the first column
+            tdIcon.appendChild(icon);
+            tr.appendChild(tdIcon);
+
+            // Add file name and other details in other columns
+            Object.values(file).forEach((element, index) => {
                 const td = document.createElement('td');
-                td.innerHTML = element;
+                if (index !== 8) { // Skip file name as it's already handled
+                    td.innerHTML = element;
+                } else {
+                    td.innerHTML = fileName; // File name
+                }
                 tr.appendChild(td);
             });
 
             filelist.appendChild(tr);
         });
 
-        document.getElementById('pwd').innerHTML = newPwd || '/';
+        document.getElementById('pwd').innerHTML = newPwd;
 
     } catch (error) {
         console.error('There was a problem with the fetch operation:', error);
     }
 }
+
 
 async function file_edit(file, editor) {
     try {
@@ -146,4 +168,47 @@ async function save() {
     } catch (error) {
         console.error('There was a problem with the fetch operation:', error);
     }
+}
+
+
+// Establish WebSocket connection
+const socket = new WebSocket('ws://127.0.0.1:8000/ws/terminal/');
+
+socket.onopen = function(e) {
+    console.log("WebSocket connection established.");
+};
+
+socket.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+    console.log("Message from server:", data.output);
+    
+    // Append the received output to the terminal <pre> element
+    const terminal = document.getElementById("terminal");
+    terminal.textContent += data.output; // textContent to keep it non-editable
+    terminal.scrollTop = terminal.scrollHeight; // Auto scroll to the bottom
+};
+
+socket.onerror = function(e) {
+    console.error("WebSocket error:", e);
+};
+
+socket.onclose = function(e) {
+    console.log("WebSocket connection closed:", e);
+};
+
+// Send the command when pressing "Enter"
+document.getElementById("command-input").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        const command = e.target.value.trim();  // Get the entered command
+        console.log("Command entered:", command);
+        
+        sendCommand(command);
+        e.target.value = "";  // Clear the input field after sending
+    }
+});
+
+// Function to send the command to the WebSocket server
+function sendCommand(command) {
+    socket.send(JSON.stringify({ command: command }));
 }

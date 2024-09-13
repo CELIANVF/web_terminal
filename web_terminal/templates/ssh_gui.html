@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css"> <!-- Optional theme -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css">
+    <!-- Optional theme -->
     <link rel="stylesheet" href="/static/main.css">
     <title>SSH GUI</title>
 </head>
@@ -15,7 +16,7 @@
 
     <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
-    <h3 id="pwd"></h3>
+    <h3 id="pwd">~</h3>
 
     <table id="filelist" class="filelist">
         <!-- File list will be populated here -->
@@ -28,19 +29,37 @@
             </div>
             <div class="content" id="file_view">
                 <textarea id="output" rows="5" cols="33" style="width: 100%; height: 90%; resize: none;"></textarea>
-
             </div>
             <input type="hidden" id="filename">
             <button type="button" onclick='save()'>save</button>
         </div>
     </div>
 
+<!-- Terminal Menu at the bottom -->
+<div id="terminal-menu" class="terminal-menu">
+    <h4>Terminal</h4>
+    
+    <!-- Non-editable terminal output area -->
+    <div id="terminal-container">
+        <pre id="terminal" style="width: 100%; height: 100%; overflow-y: auto; background-color: black; color: green;  white-space: pre-wrap;"></pre>
+        <textarea id="command-input" rows="1" style="width: 100%; resize: none;" placeholder="Enter command here"></textarea>
+
+    </div>
+    
+    <!-- Command input field -->
+</div>
+
+
+
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
     <script src="/static/index.js"></script>
+
 </body>
 
 </html>

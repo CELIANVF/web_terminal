@@ -15,19 +15,18 @@ def copy_file_to_local(username, password, host, remote_file_path, local_directo
         ssh = create_ssh_client(host, 22, username, password)
         
         # Compress the file by encoding it to base64 before copying
-        ssh.exec_command(f'cat {remote_file_path} | base64 | tr -d "\\n" > {remote_file_path}.base64')
+        # ssh.exec_command(f'cat {remote_file_path} | base64 | tr -d "\\n" > {remote_file_path}.base64')
         
         # Create SFTP session for file transfer
         sftp = paramiko.SFTPClient.from_transport(ssh.get_transport())
         
         # Define local file path
-        local_file_path = os.path.join(local_directory, os.path.basename(remote_file_path + '.base64'))
+        local_file_path = os.path.join(local_directory, os.path.basename(remote_file_path))
         
         # Copy the base64 file from remote to local
-        sftp.get(remote_file_path + '.base64', local_file_path)
+        sftp.get(remote_file_path, local_file_path)
         
         # Clean up: remove base64 file on the server
-        ssh.exec_command(f'rm {remote_file_path}.base64')
         
         sftp.close()
         ssh.close()
@@ -41,25 +40,38 @@ def copy_file_to_local(username, password, host, remote_file_path, local_directo
 
 def cd(pwd, next_dir, connection, request):
     try:
-        command = f'cd {shlex.quote(pwd + "/" + next_dir)} && ls -la {shlex.quote(pwd + "/" + next_dir)}'
+        
+        next_dir = shlex.quote(next_dir)
+        print(next_dir)
+        if next_dir == "'..'":
+            next_dir = '..'
+        if next_dir == "'.'":
+            next_dir = '.'
+        if next_dir == "'/'":
+            next_dir = '/'
+        if next_dir == "'~'":
+            next_dir = '~'
+        if next_dir == "''":
+            next_dir = ''
+        
+        command = f'cd {pwd +"/"+ next_dir} && ls -la {pwd +"/"+ next_dir}'
         print(command)
-        stdin, stdout, stderr = connection.exec_command(command)
+        stdin, stdout, stderr = connection.exec_command(command)    
 
         ls = stdout.read().decode().split('\n')
         # print(ls)
         ls = [line.split() for line in ls[1:-1]]
-
-        if next_dir == '.':
-            request.session['pwd'] = pwd
-        elif next_dir == '..':
-            pwd_parts = pwd.rstrip('/').split('/')
-            request.session['pwd'] = '/'.join(pwd_parts[:-1])
-        else:
-            request.session['pwd'] = f'{pwd}/{next_dir}'
+        
+        
+        command = f'cd {pwd +"/"+next_dir} && pwd'
+        stdin, stdout, stderr = connection.exec_command(command)
+        pwd = stdout.read().decode().strip()
+        # remove // from pwd
+        pwd = pwd.replace('//', '/')
 
         data = {
             'files': ls,
-            'pwd': request.session['pwd'],
+            'pwd': pwd,
         }
 
         return data
@@ -86,10 +98,11 @@ def cat(pwd, file, connection, request):
             print(f"File {file} copied to local")
             
             content = None
-            local_file_path = os.path.join('./temp', os.path.basename(file_path + '.base64'))
-            with open(local_file_path, 'r') as f:
-                content = f.read()
+            local_file_path = os.path.join('./temp', os.path.basename(file_path))
+            with open(local_file_path, 'rb') as f:
+                content = base64.b64encode(f.read()).decode()
                 
+            
             
                 
             content = f'data:image/{file_extension};base64,{content}'

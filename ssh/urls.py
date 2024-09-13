@@ -1,6 +1,8 @@
 # ssh/urls.py:
 
 from django.urls import path
+
+from ssh import consumers
 from . import views
 
 urlpatterns = [
